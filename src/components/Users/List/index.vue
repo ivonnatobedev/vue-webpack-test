@@ -35,11 +35,13 @@
       };
     },
     created() {
-      this.$store.dispatch(getUsers());
+      if (!this.$store.state.users.usersList.length) {
+        this.$store.dispatch(getUsers());
+      }
     },
     computed: {
       usersList: function () {
-        return this.$store.getters.getUsersList;
+        return this.$store.state.users.usersList;
       }
     },
     methods: {

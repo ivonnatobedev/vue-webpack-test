@@ -1,5 +1,5 @@
-import usersModules from './users';
+import users from './users';
 
 export default {
-  usersModules
+  users
 };

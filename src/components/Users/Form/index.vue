@@ -36,6 +36,12 @@
         :dataHandler="dataHandler"
         :inputValidators="[validators.website]"
       />
+      <simple-select
+        :inputName="'companies'"
+        :inputLabel="'Select company'"
+        :data="companiesList"
+        :get-data="getSelectedCountry"
+      />
       <action-button
         :text="'Add'"
         :handleClick="onSubmit"
@@ -50,12 +56,14 @@
 <script>
   import TextInput from '../../Common/Inputs/textInput';
   import ActionButton from '../../Common/Inputs/actionButton';
+  import SimpleSelect from '../../Common/Inputs/simpleSelect';
   import { name, required, email, website } from '../../../utils/helpers/formValidators';
   import { phone } from '../../../utils/helpers/inputMasks';
-  // name, userName, email, phone, website, company
+  import { getUsers, addUser } from '../../../store/actions';
+
   export default {
     name: 'UsersForm',
-    components: { TextInput, ActionButton },
+    components: { TextInput, ActionButton, SimpleSelect },
     data() {
       return {
         title: this.$route.params.id ? this.$route.params.id : 'Add new user',
@@ -64,9 +72,10 @@
             name: '',
             email: '',
             phone: '',
-            website: ''
+            website: '',
+            company: []
           },
-          asyncErrors: [],    // async validation errors, throws into component like :asyncErrors
+          asyncErrors: [],    // async validation errors, throws into component via :asyncErrors
           isValid: true
         },
         validators: {
@@ -79,19 +88,34 @@
     },
     methods: {
       dataHandler: function (data, errors, event) {
-        //console.log('handler event', event);
-        //console.log('handler data', data);
-        //console.log('handler errors', errors);
         this.formData.values[event.target.name] = data;
         this.formData.isValid = !errors.length;
       },
       onSubmit: function (e) {
         e.preventDefault();
-        console.log('formData', this.formData);
-        //console.log(this.$route);
+        this.$store.dispatch(addUser({
+          ...this.formData.values,
+          id: this.$store.state.users.usersList.length + 1
+        }));
+        this.$router.push({ path: '/users' });
       },
       phoneMask: function (value) {
         return phone(value);
+      },
+      getSelectedCountry: function (val) {
+        this.formData.values.company = this.$store.state.users.companiesList.find(company => {
+          return company.name === val;
+        });
+      }
+    },
+    computed: {
+      companiesList: function () {
+        return this.$store.state.users.companiesList.map(company => company.name);
+      }
+    },
+    created: function () {
+      if (this.$store.state.users.companiesList.length < 1) {
+        this.$store.dispatch(getUsers());
       }
     }
   };

@@ -123,11 +123,13 @@
   
   input {
     width: 100%;
-    border: 1px solid #878787;
-    border-radius: 5px;
-    padding: 4px 5px;
+    border: 1px solid rgba(60, 60, 60, 0.26);
+    border-radius: 4px;
+    padding: 5px;
     box-sizing: border-box;
     outline: none;
+    font-size: 1em;
+    color: #1a1a1a;
   }
 
   input:focus, input:active {

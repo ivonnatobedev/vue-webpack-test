@@ -12,6 +12,9 @@ const getters = {
   },
   getError: state => {
     return state.loadingError;
+  },
+  getCompaniesList: state => {
+    return state.companiesList;
   }
 };
 
@@ -63,6 +66,10 @@ const actions = {
       .catch(e => {
         console.log(e);
       });
+  },
+  addUser: ({ commit }, payload) => {
+    console.log('action', payload.user);
+    commit('addUser', payload.user);
   }
 };
 
