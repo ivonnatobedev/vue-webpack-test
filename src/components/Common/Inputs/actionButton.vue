@@ -81,7 +81,13 @@
   
   .normal {
     background-color: #fff;
-    border: 1px solid #1a1a1a;
+    border: 1px solid #b7b7b7;
+    color: #b7b7b7;
+  }
+
+  .normal:hover, .normal:active {
+    background-color: #b7b7b7;
+    color: #fff;
   }
 
   .warning {

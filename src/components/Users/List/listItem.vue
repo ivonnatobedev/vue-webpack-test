@@ -42,6 +42,7 @@
 
 <script>
   import ActionButton from '../../Common/Inputs/actionButton';
+  import { deleteUser } from '../../../store/actions';
 
   export default {
     name: 'ListItem',
@@ -49,15 +50,18 @@
     components: { ActionButton },
     methods: {
       onEdit: function (user) {
+        const that = this;
         return function (e) {
           e.preventDefault();
           console.log('edit', user);
+          that.$router.push({ path: `/users/${user.id}/edit` });
         };
       },
       onDelete: function (user) {
+        const that = this;
         return function (e) {
           e.preventDefault();
-          console.log('delete', user);
+          that.$store.dispatch(deleteUser(user));
         };
       },
       onPosts: function (user) {

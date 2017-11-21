@@ -61,6 +61,10 @@
         }
       }
     },
+    created: function () {
+      this.validate(this.masked(this.value));
+      this.value = this.masked(this.value);
+    },
     methods: {
       onChange: function (e) {
         this.validate(this.masked(e.target.value));
@@ -83,14 +87,20 @@
     },
     data: function () {
       return {
-        value: this.inputValue,
         name: this.inputName,
+        value: this.inputValue,
         placeholder: this.inputPlaceholder,
         errors: [],
         validators: this.inputValidators,
         mask: this.inputMask,
         label: this.inputLabel
       };
+    },
+    watch: {
+      inputValue: function (value) {
+        this.validate(this.masked(value));
+        this.value = this.masked(value);
+      }
     },
     computed: {
       allErrors: function () {

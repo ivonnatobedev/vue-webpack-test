@@ -4,6 +4,7 @@
     <v-select
       :options="dataList"
       :on-change="onChange"
+      :value="inputValue"
     />
   </label>
 </template>
@@ -32,6 +33,10 @@
         default: function (value) {
           return value;
         }
+      },
+      inputValue: {
+        type: String,
+        default: ''
       }
     },
     data() {

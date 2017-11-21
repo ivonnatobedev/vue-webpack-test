@@ -32,8 +32,8 @@ const mutations = {
   addUser: (state, user) => {
     state.usersList = [...state.usersList, user];
   },
-  deleteUser: (state, userId) => {
-    state.userList = state.usersList.filter(usr => usr.id !== userId);
+  deleteUser: (state, user) => {
+    state.usersList = state.usersList.filter(usr => usr.name !== user.name);
   },
   editUser: (state, user) => {
     state.usersList = state.usersList.map(usr => {
@@ -47,7 +47,7 @@ const mutations = {
 
 const actions = {
   getUsers: ({ commit }) => {
-    fetch('https://jsonplaceholder.typicode.com/users', {
+    return fetch('https://jsonplaceholder.typicode.com/users', {
       method: 'GET'
     })
       .then(status)
@@ -68,8 +68,16 @@ const actions = {
       });
   },
   addUser: ({ commit }, payload) => {
-    console.log('action', payload.user);
+    console.log('action addUser', payload.user);
     commit('addUser', payload.user);
+  },
+  deleteUser: ({ commit }, payload) => {
+    console.log('action delUser', payload.user);
+    commit('deleteUser', payload.user);
+  },
+  editUser: ({ commit }, payload) => {
+    console.log('action editUser', payload.user);
+    commit('editUser', payload.user);
   }
 };
 

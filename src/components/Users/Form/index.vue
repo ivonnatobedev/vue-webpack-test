@@ -6,7 +6,7 @@
         :inputName="'name'"
         :inputLabel="'Name'"
         :inputPlaceholder="'Example: John Doe'"
-        :inputValue="''"
+        :inputValue="formData.values.name"
         :dataHandler="dataHandler"
         :inputValidators="[validators.required, validators.name]"
         :required="true"
@@ -15,7 +15,7 @@
         :inputName="'email'"
         :inputLabel="'Email'"
         :inputPlaceholder="'Example: johndoe@mail.com'"
-        :inputValue="''"
+        :inputValue="formData.values.email"
         :dataHandler="dataHandler"
         :inputValidators="[validators.required, validators.email]"
         :required="true"
@@ -24,7 +24,7 @@
         :inputName="'phone'"
         :inputLabel="'Phone'"
         :inputPlaceholder="'Example: 333-333-33'"
-        :inputValue="''"
+        :inputValue="formData.values.phone"
         :dataHandler="dataHandler"
         :inputMask="phoneMask"
       />
@@ -32,7 +32,7 @@
         :inputName="'website'"
         :inputLabel="'Website'"
         :inputPlaceholder="'www.somesite.com'"
-        :inputValue="''"
+        :inputValue="formData.values.website"
         :dataHandler="dataHandler"
         :inputValidators="[validators.website]"
       />
@@ -41,9 +41,16 @@
         :inputLabel="'Select company'"
         :data="companiesList"
         :get-data="getSelectedCountry"
+        :inputValue="formData.values.company ? formData.values.company.name : ''"
       />
       <action-button
-        :text="'Add'"
+        :text="'Back'"
+        :handleClick="onBackHandler"
+        :type="'normal'"
+        :size="'md'"
+      />
+      <action-button
+        :text="btnText"
         :handleClick="onSubmit"
         :type="'success'"
         :size="'md'"
@@ -59,21 +66,21 @@
   import SimpleSelect from '../../Common/Inputs/simpleSelect';
   import { name, required, email, website } from '../../../utils/helpers/formValidators';
   import { phone } from '../../../utils/helpers/inputMasks';
-  import { getUsers, addUser } from '../../../store/actions';
+  import { getUsers, addUser, editUser } from '../../../store/actions';
 
   export default {
     name: 'UsersForm',
     components: { TextInput, ActionButton, SimpleSelect },
     data() {
       return {
-        title: this.$route.params.id ? this.$route.params.id : 'Add new user',
+        //title: '',
         formData: {
           values: {
             name: '',
             email: '',
             phone: '',
             website: '',
-            company: []
+            company: {}
           },
           asyncErrors: [],    // async validation errors, throws into component via :asyncErrors
           isValid: true
@@ -88,15 +95,17 @@
     },
     methods: {
       dataHandler: function (data, errors, event) {
+        console.log(data);
         this.formData.values[event.target.name] = data;
         this.formData.isValid = !errors.length;
       },
       onSubmit: function (e) {
         e.preventDefault();
-        this.$store.dispatch(addUser({
-          ...this.formData.values,
-          id: this.$store.state.users.usersList.length + 1
-        }));
+        if (this.mode === 'edit') {
+          this.onEdit();
+        } else {
+          this.onCreate();
+        }
         this.$router.push({ path: '/users' });
       },
       phoneMask: function (value) {
@@ -106,16 +115,64 @@
         this.formData.values.company = this.$store.state.users.companiesList.find(company => {
           return company.name === val;
         });
+      },
+      onCreateMode: function () {
+        this.type = 'create';
+        if (!this.$store.state.users.usersList.length) {
+          this.$store.dispatch(getUsers());
+        }
+      },
+      onEditMode: function () {
+        this.type = 'edit';
+        const that = this;
+        if (!that.$store.state.users.usersList.length) {
+          that.$store.dispatch(getUsers())
+            .then(() => {
+              const obj = that.$store.state.users.usersList.find(usr => {
+                return usr.id.toString() === that.$route.params.id.toString();
+              });
+              that.formData.values = { ...obj };
+            });
+        } else {
+          const obj = that.$store.state.users.usersList.find(usr => {
+            return usr.id.toString() === that.$route.params.id.toString();
+          });
+          that.formData.values = { ...obj };
+        }
+      },
+      onCreate: function () {
+        this.$store.dispatch(addUser({
+          ...this.formData.values,
+          id: this.$store.state.users.usersList.length + 1
+        }));
+      },
+      onEdit: function () {
+        this.$store.dispatch(editUser(this.formData.values));
+      },
+      onBackHandler: function (e) {
+        e.preventDefault();
+        this.$router.go(-1);
       }
     },
     computed: {
       companiesList: function () {
         return this.$store.state.users.companiesList.map(company => company.name);
+      },
+      mode: function () {
+        return this.$route.params.id ? 'edit' : 'add';
+      },
+      btnText: function () {
+        return this.mode === 'edit' ? 'Edit' : 'Add';
+      },
+      title: function () {
+        return this.mode === 'edit' ? `Edit ${this.formData.values.name}` : 'Add new user';
       }
     },
-    created: function () {
-      if (this.$store.state.users.companiesList.length < 1) {
-        this.$store.dispatch(getUsers());
+    created: async function () {
+      if (this.$route.params.id) {
+        this.onEditMode();
+      } else {
+        this.onCreateMode();
       }
     }
   };
